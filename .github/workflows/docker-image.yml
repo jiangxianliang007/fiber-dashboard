@@ -17,10 +17,11 @@ concurrency:
 
 env:
   IMAGE_NAME: ghcr.io/${{ github.repository }}-backend
+  LATEST_BRANCH: master
 
 jobs:
   docker:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout
@@ -32,8 +33,6 @@ jobs:
       - name: Prepare image metadata
         id: meta
         shell: bash
-        env:
-          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
           set -euo pipefail
 
@@ -61,7 +60,7 @@ jobs:
           short_sha="${GITHUB_SHA::7}"
 
           tags="${IMAGE_NAME}:${branch_tag}-${short_sha}"
-          if [[ "${GITHUB_EVENT_NAME}" != "pull_request" && "${GITHUB_REF_NAME}" == "${DEFAULT_BRANCH}" ]]; then
+          if [[ "${GITHUB_EVENT_NAME}" != "pull_request" && "${raw_branch}" == "${LATEST_BRANCH}" ]]; then
             tags="${tags}"$'\n'"${IMAGE_NAME}:latest"
           fi
 
